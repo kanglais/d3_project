@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3 Test Project</title>
+		<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+		<style type="text/css">
+			.chart rect {
+			  fill: steelblue;
+			}
+
+			.chart text {
+			  fill: white;
+			  font: 10px sans-serif;
+			  text-anchor: end;
+			}
+		</style>
+	</head>
+	<body>
+		<svg class="chart"></svg>
+		<script type="text/javascript">
+			var svg = d3.select("svg"),
+			    margin = {top: 20, right: 20, bottom: 30, left: 40},
+			    w = 900,
+			    h = 500, 
+			    width = w - margin.left - margin.right, 
+			    height = h - margin.top - margin.bottom
+
+			var months = ['jan', 'feb', 'mar', 'april', 'may', 'june', 'july', 'aug', 'sept', 'oct', 'nov', 'dec'];
+			var years = ['2011', '2012', '2013', '2014', '2015'];
+
+			d3.csv("meteo.csv", function(data) {
+
+				dataset = data;
+
+				var year = d3.nest()
+					.key(function(d) {
+						return d.year;
+					})
+					.key(function(d) {
+						return d.month;
+					})
+					.sortKeys(d3.ascending)
+					.key(function(d) {
+						return d.day;
+					})
+					.key(function(d) {
+						return d.temperature;
+					})
+					.entries(dataset);
+
+				console.log(year);
+
+				//draw svg
+
+				var dataMax = d3.max(dataset)
+
+			})
+		</script>
+	</body>
+</html>
