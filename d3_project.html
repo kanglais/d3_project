@@ -19,6 +19,7 @@
 		</style>
 	</head>
 	<body>
+		<svg> </svg>
 		<script type="text/javascript">
 			var w = 700;
 			var h = 400;
@@ -27,26 +28,11 @@
 			var yPadding = 3;
 			var dataset;
 
+			
+
 			d3.csv("meteo.csv", function(data) { 
 
 				dataset = data;
-
-				//month as x axis
-
-				/*var month = d3.nest()
-					.key(function(d) {
-						return d.month;
-					})
-					.entries(dataset);*/
-
-
-				//temp as y axis 
-
-				/*var temp = d3.nest()
-					.key(function(d) {
-						return d.temperature;
-					})
-					.entries(dataset);*/
 
 				var year = d3.nest()
 					.key(function(d) {
@@ -82,7 +68,7 @@
 					.rollup(function(v) {
 						return d3.mean(v, function(d) {
 							return d.amount;
-						});
+						})
 					.entries(temp);
 
 				console.log(tempByMonth);
@@ -162,13 +148,9 @@
 				    .attr("class", "axis")
 				    .attr("transform", "translate(" + yPadding + ",0)")
 				    .call(yAxis);
+				}
+			});
 
-					});
-
-
-			//var formatDate = d3.time.format(".1%");
-
-			
 
 		</script>
 	</body>
