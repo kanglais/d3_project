@@ -8,7 +8,7 @@
 			.axis path,
 			.axis line {
 			    fill: none;
-			    stroke: yellow;
+			    stroke: black;
 			    shape-rendering: crispEdges;
 			}
 
@@ -21,18 +21,28 @@
 	<body>
 		<svg> </svg>
 		<script type="text/javascript">
-			var w = 700;
-			var h = 400;
+			var w = 500;
+			var h = 300;
 			var barPadding = 1;
 			var xPadding = 20;
 			var yPadding = 3;
 			var dataset;
+			var count = 0;
+			var currYear = 0;
 
-			
+			//check yScale; make year toggle
+
 
 			d3.csv("meteo.csv", function(data) { 
 
 				dataset = data;
+
+				dataset.forEach(function(d) {
+					dataset.day = +dataset.day;
+					dataset.month = +dataset.month;
+					dataset.year = +dataset.year;
+					dataset.temperature = +dataset.temperature;
+				});
 
 				var year = d3.nest()
 					.key(function(d) {
@@ -42,37 +52,17 @@
 						return d.month;
 					})
 					.sortKeys(d3.ascending)
-					.key(function(d) {
-						return d.temperature;
-					})
-					.entries(dataset);
-
-				console.log(year);
-
-				var temp = d3.nest()
-					.key(function(d) {
-						return d.month
-					})
-					.sortKeys(d3.ascending)
-					.key(function(d) {
-						return d.temperature;
-					})
-					.entries(dataset);
-
-				console.log(temp);
-
-				var tempByMonth = d3.nest() 
-					.key(function(d) {
-						return d.temperature;
-					})
 					.rollup(function(v) {
-						return d3.mean(v, function(d) {
-							return d.amount;
-						})
-					.entries(temp);
+						return Math.round(d3.mean(v, function(d) {
+							return d.temperature;
+						}));
+					})
+					.entries(dataset);
 
-				console.log(tempByMonth);
-				
+				console.log(year[0]["values"][0]["values"]);
+				console.log(year[0]["values"][0]["key"])
+				console.log(year[0]["values"])
+
 				var xScale = d3.scale.linear()
                  .domain([0, d3.max(year, function(d) { 
                  	return d; 
@@ -81,17 +71,17 @@
                  .range([0, w]);
 
             	var yScale = d3.scale.linear()
-                     .domain([0, d3.max(temp, function(d) { 
-                     	return d; 
+                     .domain([0, d3.max(year[currYear].values.length, function(d) { 
+                     	console.log(d.values);
+                     	return d.values; 
                      	})
                      ])
-                     .range([0, h]);
+                    .range([h, 0]);
 
            		var xAxis = d3.svg.axis()
 					.scale(xScale)
 					.orient("bottom")
 					.ticks(5);
-					//.tickFormat(formatAsPercentage);
 
 				var yAxis = d3.svg.axis()
                   .scale(yScale)
@@ -104,40 +94,42 @@
 				.attr("height", h);
 
 				svg.selectAll("rect")
-					.data(year)
+					.data(year[currYear]["values"])
 					.enter()
 					.append("rect")
 				    .attr("x", function(d, i) {
-						return i * (w / year.length);
+				    	//console.log(d["values"]);
+						return i * (w / year[currYear].values.length);
+
 					})
 					.attr("y", function (d) {
-						return h - yScale(d)-yPadding;
+						return h - (d["values"])-yPadding;
 					})
-					.attr("width", w / year.length - barPadding)
+					.attr("width", w / 12 - barPadding)
 					.attr("height", function(d) {
-						return yScale(d);
-					});
-					//.attr("fill", function(d) {
-					//	return "rgb(0, 0, " + (d * 10) + ")";
-					//})
+						return d["values"];
+					})
+					.attr("fill", "teal");
 
 				svg.selectAll("text")
-					.data(year)
+					.data(year[currYear]["values"])
 					.enter()
 					.append("text")
 					.text(function(d) {
-						return d;
+						return d.key;
 					})
 					.attr("x", function(d, i) {
-						return i * (w / year.length) + (w / year.length - xPadding) / 2;
+				    	//console.log(d["values"]);
+						return i * (w / year[currYear].values.length) + 15;
+
 					})
 					.attr("y", function (d) {
-						return h - yScale(d) + 20;
+						return (h - (d["values"])) + 10;
 					})
 					.attr("font-family", "sans-serif")
 					.attr("font-size", "11px")
-					.attr("fill", "white")
-					.attr("text-anchor", "middle");
+					.attr("fill", "black")
+					.attr("text-anchor", "top");
 
 				svg.append("g")
 					.attr("class", "axis")
@@ -147,8 +139,16 @@
 				svg.append("g")
 				    .attr("class", "axis")
 				    .attr("transform", "translate(" + yPadding + ",0)")
+				    .text(function(d) {
+	                  	return year[currYear].values;
+	                  })
 				    .call(yAxis);
-				}
+
+				svg.append("text")
+					.attr("text-anchor", "middle")
+					.attr("transform", "translate(" + (w/2) + "," +(h-(barPadding/3))+")")
+					.text("2011")
+				
 			});
 
 
